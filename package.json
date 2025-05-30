@@ -1,0 +1,27 @@
+{
+	"name": "dhb-v2",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"db:generate": "prisma generate",
+		"db:studio": "prisma studio",
+		"db:push": "prisma db push",
+		"lint": "biome check .",
+		"lint:fix": "biome check . --write"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"@prisma/client": "^6.8.2",
+		"discord.js": "^14.19.3",
+		"dotenv": "^16.5.0",
+		"prisma": "^6.8.2",
+		"zod": "^3.25.41"
+	}
+}

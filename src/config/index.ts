@@ -9,6 +9,10 @@ const envSchema = z.object({
 	DEV_GUILD_ID: z.string(),
 	NODE_ENV: z.string().optional().default("development"),
 	DATABASE_URI: z.string(),
+	LAVALINK_HOST: z.string().optional().default("localhost"),
+	LAVALINK_PORT: z.string().optional().default("2333"),
+	LAVALINK_PASSWORD: z.string().optional().default("youshallnotpass"),
+	LAVALINK_SECURE: z.string().optional().default("false"),
 });
 
 export const env = envSchema.parse(process.env);
@@ -20,4 +24,10 @@ export default {
 	DEV_GUILD_ID: env.DEV_GUILD_ID,
 	NODE_ENV: env.NODE_ENV,
 	DB_URI: env.DATABASE_URI,
+	LAVALINK: {
+		HOST: env.LAVALINK_HOST,
+		PORT: Number.parseInt(env.LAVALINK_PORT),
+		PASSWORD: env.LAVALINK_PASSWORD,
+		SECURE: env.LAVALINK_SECURE === "true",
+	},
 };

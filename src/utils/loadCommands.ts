@@ -1,9 +1,9 @@
 import { Collection, REST, Routes } from "discord.js";
 import config from "../config";
-import type { Command, MusicCommand } from "../interface";
+import type { Command } from "../interface";
 import { getFiles } from "./getFiles";
 
-const commands: Collection<string, Command | MusicCommand> = new Collection();
+const commands: Collection<string, Command> = new Collection();
 const commandsData: JSON[] = [];
 
 export async function loadCommands() {
@@ -12,15 +12,15 @@ export async function loadCommands() {
 	await Promise.all(
 		files.map(async (file: string) => {
 			try {
-				const { default: command } = await import(file);
-				if (!command?.data?.name) {
-					console.log(`Invalid Command File: ${file}`);
+				const { default: command } = (await import(file)).default;
+				if (!command.data.name) {
+					console.log(`Invalid Event File: ${file}`);
 					return;
 				}
 				commands.set(command.data.name, command);
 				commandsData.push(command.data.toJSON());
 			} catch (err) {
-				console.log(`Failed to Load Command: ${file.split("/").pop()}`);
+				console.log(`Failed to Load Event: ${file.split("/").pop()}`);
 				console.error(err);
 			}
 		}),

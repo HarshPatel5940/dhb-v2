@@ -4,9 +4,13 @@ import { z } from "zod";
 config();
 
 const envSchema = z.object({
-	DISCORD_TOKEN: z.string(),
-	DISCORD_CLIENT_ID: z.string(),
-	DEV_GUILD_ID: z.string(),
+	DISCORD_TOKEN: z.string().min(10, "DISCORD_TOKEN is required"),
+	DISCORD_CLIENT_ID: z
+		.string()
+		.regex(/^\d{8,}$/, "DISCORD_CLIENT_ID must be a valid number string"),
+	DEV_GUILD_ID: z
+		.string()
+		.regex(/^\d{8,}$/, "DEV_GUILD_ID must be a valid number string"),
 	NODE_ENV: z.string().optional().default("development"),
 	DATABASE_URI: z.string(),
 	LAVALINK_HOST: z.string().optional().default("localhost"),

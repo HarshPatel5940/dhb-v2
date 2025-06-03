@@ -66,7 +66,7 @@ export default {
       try {
         new URL(query);
       } catch {
-        searchQuery = `ytsearch:${query}`;
+        searchQuery = `spsearch:${query}`;
       }
 
       const node = musicManager.shoukaku.getIdealNode();

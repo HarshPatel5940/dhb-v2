@@ -6,46 +6,35 @@ server:
 
 lavalink:
   plugins:
-    # - dependency: "com.github.topi314.sponsorblock:sponsorblock-plugin:3.0.1"
-    # - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.3.0"
-    # - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0"
-  server:
-    password: "youshallnotpass"
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.3.0"
+      repository: "https://maven.lavalink.dev/releases"
+
+plugins:
+  lavasrc:
+    providers: # Custom providers for track loading. This is the default
+      # - 'ytsearch:"%ISRC%"' # Will be ignored if track does not have an ISRC. See https://esearch.wikipedia.org/wiki/International_Standard_Recording_Code
+      # - "ytsearch:%QUERY%" # Will be used if track has no ISRC or no track could be found for the ISRC
+      # - "scsearch:%QUERY%" # Soundcloud search provider
+      - "spsearch:%QUERY%" # Spotify search provider
+      # - "sprec:%QUERY%" # Spotify recommendation search provider
+      # - "ymsearch:%QUERY%" # YouTube Music search provider
+      # - "amsearch:%QUERY%" # Apple Music search provider
+      # - "dzisrc:%ISRC%" # Deezer ISRC provider
+      # - "dzsearch:%QUERY%" # Deezer search provider
+      # - "ymsearch:%QUERY%" # Yandex Music search provider
+
     sources:
-      youtube: true
-      bandcamp: true
-      soundcloud: true
-      twitch: true
-      vimeo: true
-      nico: true
-      spotify: false # Requires lavasrc plugin
-      applemusic: false # Requires lavasrc plugin
-      deezer: false # Requires lavasrc plugin
-      yandexmusic: false # Requires lavasrc plugin
-      flowery-tts: false # Requires lavasrc plugin
-      youtube-music: false # Requires lavasrc plugin
-    filters:
-      volume: true
-      equalizer: true
-      karaoke: true
-      timescale: true
-      tremolo: true
-      vibrato: true
-      distortion: true
-      rotation: true
-      channelMix: true
-      lowPass: true
-    bufferDurationMs: 400
-    frameBufferDurationMs: 5000
-    opusEncodingQuality: 10
-    resamplingQuality: LOW
-    trackStuckThresholdMs: 10000
-    useSeekGhosting: true
-    youtubePlaylistLoadLimit: 6
-    playerUpdateInterval: 5
-    youtubeSearchEnabled: true
-    soundcloudSearchEnabled: true
-    gc-warnings: true
+      spotify: true # Enable Spotify source
+      applemusic: false # Enable Apple Music source
+      deezer: false # Enable Deezer source
+      yandexmusic: false # Enable Yandex Music source
+
+    spotify:
+      clientId: "f44549ed92954285ac392bc331a6771c"
+      clientSecret: "677aeae5587e4078bc2f1cb160c61e21"
+      countryCode: "US" # the country code you want to use for filtering the artists top tracks. See https://esearch.wikipedia.org/wiki/ISO_3166-1_alpha-2
+      playlistLoadLimit: 6 # The number of pages at 100 tracks each
+      albumLoadLimit: 6 # The number of pages at 50 tracks each
 
 metrics:
   prometheus:
@@ -59,7 +48,7 @@ sentry:
 logging:
   file:
     path: ./logs/
-  
+
   level:
     root: INFO
     lavalink: INFO

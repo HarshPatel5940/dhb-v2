@@ -21,6 +21,12 @@ export class MusicManager extends EventEmitter {
     this.client = client;
     this.queues = new Map();
 
+    if (this.client.user === null || this.client == null) {
+      throw new Error(
+        "Client user is not set. Ensure the client is logged in before initializing MusicManager."
+      );
+    }
+
     const shoukakuNodes = nodes.map((node) => ({
       name: node.name,
       url: `${node.host}:${node.port}`,
@@ -47,13 +53,14 @@ export class MusicManager extends EventEmitter {
     );
 
     this.setupEvents();
-    
-    // Connect to Shoukaku after client is ready
-    if (client.user?.id) {
+
+    if (this.client.user.id) {
       this.shoukaku.connect();
     } else {
-      client.once('ready', () => {
-        console.log(`🤖 Client ready, connecting Shoukaku with user ID: ${client.user!.id}`);
+      client.once("ready", () => {
+        console.log(
+          `🤖 Client ready, connecting Shoukaku with user ID: ${this.client.user?.id}`
+        );
         this.shoukaku.connect();
       });
     }
@@ -61,7 +68,7 @@ export class MusicManager extends EventEmitter {
 
   private setupEvents(): void {
     console.log("🔗 Setting up Shoukaku event listeners...");
-    
+
     this.shoukaku
       .on(Events.Ready, (node, resumed) => {
         console.log(
@@ -93,9 +100,11 @@ export class MusicManager extends EventEmitter {
 
     // Log initial connection attempts
     setTimeout(() => {
-      console.log(`🔍 Checking node states after initialization:`);
+      console.log("🔍 Checking node states after initialization:");
       this.shoukaku.nodes.forEach((node, name) => {
-        console.log(`  ${name}: state=${node.state}, connected=${node.state === 1}`);
+        console.log(
+          `  ${name}: state=${node.state}, connected=${node.state === 1}`
+        );
       });
     }, 2000);
   }

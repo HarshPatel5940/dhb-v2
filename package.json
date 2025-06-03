@@ -30,7 +30,7 @@
 		"esbuild": "^0.25.5",
 		"glob": "^11.0.2",
 		"prisma": "^6.8.2",
-		"shoukaku": "^4.1.1",
+		"shoukaku": "github:shipgirlproject/Shoukaku#cd319abde19b23a93d9367a6b28be5077e22e953",
 		"zod": "^3.25.46"
 	},
 	"packageManager": "pnpm@10.11.0",

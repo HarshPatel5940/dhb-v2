@@ -1,0 +1,70 @@
+server:
+  port: 2333
+  address: 0.0.0.0
+  http2:
+    enabled: false
+
+lavalink:
+  plugins:
+    # - dependency: "com.github.topi314.sponsorblock:sponsorblock-plugin:3.0.1"
+    # - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.3.0"
+    # - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0"
+  server:
+    password: "youshallnotpass"
+    sources:
+      youtube: true
+      bandcamp: true
+      soundcloud: true
+      twitch: true
+      vimeo: true
+      nico: true
+      spotify: false # Requires lavasrc plugin
+      applemusic: false # Requires lavasrc plugin
+      deezer: false # Requires lavasrc plugin
+      yandexmusic: false # Requires lavasrc plugin
+      flowery-tts: false # Requires lavasrc plugin
+      youtube-music: false # Requires lavasrc plugin
+    filters:
+      volume: true
+      equalizer: true
+      karaoke: true
+      timescale: true
+      tremolo: true
+      vibrato: true
+      distortion: true
+      rotation: true
+      channelMix: true
+      lowPass: true
+    bufferDurationMs: 400
+    frameBufferDurationMs: 5000
+    opusEncodingQuality: 10
+    resamplingQuality: LOW
+    trackStuckThresholdMs: 10000
+    useSeekGhosting: true
+    youtubePlaylistLoadLimit: 6
+    playerUpdateInterval: 5
+    youtubeSearchEnabled: true
+    soundcloudSearchEnabled: true
+    gc-warnings: true
+
+metrics:
+  prometheus:
+    enabled: false
+    endpoint: /metrics
+
+sentry:
+  dsn: ""
+  environment: ""
+
+logging:
+  file:
+    path: ./logs/
+  
+  level:
+    root: INFO
+    lavalink: INFO
+
+  logback:
+    rollingpolicy:
+      max-file-size: 25MB
+      max-history: 30

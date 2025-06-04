@@ -1,6 +1,7 @@
 import {
 	ActionRowBuilder,
 	ChannelType,
+	type ChatInputCommandInteraction,
 	ModalBuilder,
 	PermissionFlagsBits,
 	SlashCommandBuilder,
@@ -30,7 +31,7 @@ export default {
 				.setRequired(false),
 		) as SlashCommandBuilder,
 
-	async execute(interaction) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		if (!interaction.guild) return;
 		const channelId = (interaction.options.getChannel("channel")?.id ||
 			interaction.channelId) as string;

@@ -4,8 +4,7 @@ import {
 	Events,
 	type Interaction,
 } from "discord.js";
-import type { Command } from "../interface";
-import handleLFGInteractions from "./handleLFGInteractions";
+import type { Command, MusicCommand } from "../interface";
 
 export default {
 	name: Events.InteractionCreate,
@@ -13,25 +12,14 @@ export default {
 
 	async execute(
 		interaction: Interaction,
-		commands: Collection<string, Command>,
+		commands: Collection<string, Command | MusicCommand>,
 		client: Client,
 	) {
 		try {
-			if (
-				(interaction.isButton() && interaction.customId.startsWith("lfg-")) ||
-				(interaction.isStringSelectMenu() &&
-					interaction.customId.startsWith("lfg-"))
-			) {
-				console.log(
-					`[LFG DEBUG] Delegating interaction to LFG handler: ${interaction.id}`,
-				);
-				return await handleLFGInteractions.execute(interaction, client);
-			}
-
 			if (interaction.isChatInputCommand()) {
 				const command = commands.get(interaction.commandName);
 				if (!command) {
-					console.log("Command not found here", commands);
+					console.log("Command not found");
 					await interaction.reply({
 						content: "Command not found",
 						ephemeral: true,
@@ -53,7 +41,7 @@ export default {
 			} else if (interaction.isAutocomplete()) {
 				const command = commands.get(interaction.commandName);
 				if (!command) {
-					console.log("Command not found here", commands);
+					console.log("Command not found");
 					return;
 				}
 				try {

@@ -13,24 +13,40 @@ model Guild {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  musicSettings MusicSettings?
+  // musicSettings      MusicSettings?
+  ModerationSettings ModerationSettings?
 
   @@map("guilds")
 }
 
-model MusicSettings {
+// model MusicSettings {
+//   id      String @id @default(auto()) @map("_id") @db.ObjectId
+//   guildId String @unique
+//   guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+//   defaultVolume    Int     @default(50)
+//   maxQueueSize     Int     @default(100)
+//   allowDuplicates  Boolean @default(true)
+//   djRole           String?
+//   musicChannelOnly String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@map("music_settings")
+// }
+
+model ModerationSettings {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   guildId String @unique
   guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
 
-  defaultVolume    Int     @default(50)
-  maxQueueSize     Int     @default(100)
-  allowDuplicates  Boolean @default(true)
-  djRole           String?
-  musicChannelOnly String?
+  logChannelId     String?
+  modRoleId        String?
+  modLogWebhookUrl String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("music_settings")
+  @@map("moderation_settings")
 }

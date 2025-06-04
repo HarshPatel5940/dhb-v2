@@ -38,9 +38,7 @@ async function initialiseBot() {
       process.exit(0);
     });
 
-    // Wait for client to be ready before initializing music manager
     client.once("ready", () => {
-      // Initialize music manager after client is ready
       initializeMusicManager(client);
     });
 

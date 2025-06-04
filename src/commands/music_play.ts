@@ -62,11 +62,11 @@ export default {
         textChannel,
       });
 
-      let searchQuery = query;
+      let searchQuery = `scsearch:${query}`;
       try {
         new URL(query);
       } catch {
-        searchQuery = `spsearch:${query}`;
+        searchQuery = `scsearch:${query}`;
       }
 
       const node = musicManager.shoukaku.getIdealNode();

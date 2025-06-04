@@ -27,7 +27,7 @@ plugins:
 
     spotify:
       clientId: "f44549ed92954285ac392bc331a6771c"
-      clientSecret: "677aeae5587e4078bc2f1cb160c61e21"
+      clientSecret: "677aeae5587e4078bc2f1cb160c61e21" # This is expired, Don;t worry idiot!
       countryCode: "US"
       playlistLoadLimit: 6
       albumLoadLimit: 6

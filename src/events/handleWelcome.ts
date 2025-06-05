@@ -1,6 +1,5 @@
 import {
   ChannelType,
-  type Client,
   EmbedBuilder,
   Events,
   type GuildMember,
@@ -11,7 +10,7 @@ export default {
   name: Events.GuildMemberAdd,
   once: false,
 
-  execute: async (member: GuildMember, Client: Client) => {
+  execute: async (member: GuildMember) => {
     try {
       const guildSettings = await ModerationService.getGuild(member.guild.id);
 
@@ -20,7 +19,7 @@ export default {
       }
 
       const welcomeChannel = member.guild.channels.cache.get(
-        guildSettings.welcomeChannelId,
+        guildSettings.welcomeChannelId
       );
 
       if (!welcomeChannel || welcomeChannel.type !== ChannelType.GuildText) {
@@ -34,7 +33,7 @@ export default {
         !botMember.permissionsIn(welcomeChannel).has("SendMessages")
       ) {
         console.warn(
-          `Bot does not have permission to send messages in ${welcomeChannel.name}`,
+          `Bot does not have permission to send messages in ${welcomeChannel.name}`
         );
         return;
       }

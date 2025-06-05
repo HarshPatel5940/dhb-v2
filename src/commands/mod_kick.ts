@@ -1,14 +1,16 @@
 import {
   type ChatInputCommandInteraction,
+  EmbedBuilder,
   type GuildMember,
   PermissionFlagsBits,
   SlashCommandBuilder,
 } from "discord.js";
 import type { Command } from "../interface/command.js";
 import {
+  ModActionType,
   type ModerationAction,
   ModerationService,
-} from "../service-classes/moderationService.js";
+} from "../service-classes/ModHelper.js";
 
 export default {
   data: new SlashCommandBuilder()
@@ -41,7 +43,6 @@ export default {
     const moderationService = new ModerationService();
     const moderator = interaction.member as GuildMember;
 
-    // Check if user has moderation permissions
     const hasModPerms = await moderationService.hasModPermissions(
       interaction.guild.id,
       moderator
@@ -58,7 +59,6 @@ export default {
     const reason =
       interaction.options.getString("reason") || "No reason provided";
 
-    // Check if the target user is in the guild
     const targetMember = await interaction.guild.members
       .fetch(targetUser.id)
       .catch(() => null);
@@ -70,7 +70,6 @@ export default {
       });
     }
 
-    // Check if the bot can kick this member
     if (!targetMember.kickable) {
       return await interaction.reply({
         content:
@@ -79,7 +78,6 @@ export default {
       });
     }
 
-    // Check if the moderator is trying to kick themselves
     if (targetMember.id === moderator.id) {
       return await interaction.reply({
         content: "❌ You cannot kick yourself!",
@@ -87,7 +85,6 @@ export default {
       });
     }
 
-    // Check role hierarchy
     if (
       moderator.roles.highest.position <= targetMember.roles.highest.position &&
       interaction.guild.ownerId !== moderator.id
@@ -99,7 +96,6 @@ export default {
       });
     }
 
-    // Check if target is the guild owner
     if (targetMember.id === interaction.guild.ownerId) {
       return await interaction.reply({
         content: "❌ You cannot kick the server owner!",
@@ -108,33 +104,61 @@ export default {
     }
 
     try {
-      // Try to DM the user before kicking
       try {
         await targetUser.send({
           content: `👢 You have been kicked from **${interaction.guild.name}**\n**Reason:** ${reason}`,
         });
       } catch (error) {
-        // User has DMs disabled or blocked the bot
         console.log("Could not DM user about kick:", error);
       }
 
-      // Perform the kick
       await targetMember.kick(reason);
 
-      // Create moderation action for logging
       const moderationAction: ModerationAction = {
-        type: "kick",
+        type: ModActionType.KICK,
         target: targetUser,
         moderator: interaction.user,
         reason,
         guild: interaction.guild,
       };
 
-      // Log the action
-      await moderationService.logModerationAction(moderationAction);
+      const modCase = await moderationService.logModerationAction(
+        interaction.client,
+        moderationAction
+      );
+
+      const responseEmbed = new EmbedBuilder()
+        .setTitle("👢 Kick Executed Successfully")
+        .setColor(0x00ff00)
+        .addFields(
+          {
+            name: "📋 Case Number",
+            value: `#${modCase.caseNumber}`,
+            inline: true,
+          },
+          {
+            name: "🎯 Kicked User",
+            value: `${targetUser.tag}\n<@${targetUser.id}>`,
+            inline: true,
+          },
+          {
+            name: "👮 Moderator",
+            value: `${interaction.user.tag}\n<@${interaction.user.id}>`,
+            inline: true,
+          },
+          {
+            name: "📝 Reason",
+            value: reason,
+            inline: false,
+          }
+        )
+        .setTimestamp()
+        .setFooter({
+          text: `Target ID: ${targetUser.id} • Moderator ID: ${interaction.user.id}`,
+        });
 
       await interaction.reply({
-        content: `👢 Successfully kicked **${targetUser.tag}** from the server!\n**Reason:** ${reason}`,
+        embeds: [responseEmbed],
       });
     } catch (error) {
       console.error("Error kicking member:", error);

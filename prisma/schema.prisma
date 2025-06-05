@@ -13,40 +13,63 @@ model Guild {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // musicSettings      MusicSettings?
-  ModerationSettings ModerationSettings?
+  modLogChannelID    String?
+  serverLogChannelID String?
+  modRoleId          String?
+
+  modLogWebhookUrl    String?
+  serverLogWebhookUrl String?
+
+  MusicSettings MusicSettings?
+  ModCases      ModCases[]
 
   @@map("guilds")
 }
 
-// model MusicSettings {
-//   id      String @id @default(auto()) @map("_id") @db.ObjectId
-//   guildId String @unique
-//   guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
-
-//   defaultVolume    Int     @default(50)
-//   maxQueueSize     Int     @default(100)
-//   allowDuplicates  Boolean @default(true)
-//   djRole           String?
-//   musicChannelOnly String?
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@map("music_settings")
-// }
-
-model ModerationSettings {
+// TODO: Make use of this MusicSettings Later On...
+model MusicSettings {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   guildId String @unique
   guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
 
-  logChannelId     String?
-  modRoleId        String?
-  modLogWebhookUrl String?
+  defaultVolume    Int     @default(50)
+  maxQueueSize     Int     @default(100)
+  allowDuplicates  Boolean @default(true)
+  djRole           String?
+  musicChannelOnly String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("moderation_settings")
+  @@map("music_settings")
+}
+
+model ModCases {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  caseNumber      Int    @unique
+  TargetUserID    String
+  ModeratorUserID String
+
+  action ModActionType
+
+  reason String @default("No reason provided")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("mod_cases")
+}
+
+enum ModActionType {
+  WARN
+  TIMEOUT
+  KICK
+  BAN
+  HACKBAN // target non-members in server to be banned
+  UNBAN
+  UNTIMEOUT
 }

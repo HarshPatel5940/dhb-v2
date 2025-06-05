@@ -6,10 +6,7 @@ import {
   loadEvents,
   registerSlashCommands,
 } from "./utils";
-import {
-  destroyMusicManager,
-  initializeMusicManager,
-} from "./utils/musicManager";
+import { destroyMusicManager } from "./utils/musicManager";
 import prisma from "./utils/prisma";
 
 async function initialiseBot() {
@@ -19,6 +16,12 @@ async function initialiseBot() {
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.GuildVoiceStates,
       GatewayIntentBits.MessageContent,
+      GatewayIntentBits.GuildWebhooks,
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildModeration,
+      GatewayIntentBits.GuildMessageReactions,
+      GatewayIntentBits.GuildPresences,
+      GatewayIntentBits.GuildInvites,
     ],
   });
 
@@ -36,10 +39,6 @@ async function initialiseBot() {
       await prisma.$disconnect();
       await client.destroy();
       process.exit(0);
-    });
-
-    client.once("ready", () => {
-      initializeMusicManager(client);
     });
 
     await client.login(config.BOT_TOKEN);

@@ -1,14 +1,16 @@
 import {
   type ChatInputCommandInteraction,
+  EmbedBuilder,
   type GuildMember,
   PermissionFlagsBits,
   SlashCommandBuilder,
 } from "discord.js";
 import type { Command } from "../interface/command.js";
 import {
+  ModActionType,
   type ModerationAction,
   ModerationService,
-} from "../service-classes/moderationService.js";
+} from "../service-classes/ModHelper.js";
 
 export default {
   data: new SlashCommandBuilder()
@@ -46,7 +48,6 @@ export default {
     const moderationService = new ModerationService();
     const moderator = interaction.member as GuildMember;
 
-    // Check if user has moderation permissions
     const hasModPerms = await moderationService.hasModPermissions(
       interaction.guild.id,
       moderator
@@ -64,13 +65,11 @@ export default {
       interaction.options.getString("reason") || "No reason provided";
     const deleteDays = interaction.options.getInteger("delete-days") || 0;
 
-    // Check if the target user is in the guild
     const targetMember = await interaction.guild.members
       .fetch(targetUser.id)
       .catch(() => null);
 
     if (targetMember) {
-      // Check if the bot can ban this member
       if (!targetMember.bannable) {
         return await interaction.reply({
           content:
@@ -79,7 +78,6 @@ export default {
         });
       }
 
-      // Check if the moderator is trying to ban themselves
       if (targetMember.id === moderator.id) {
         return await interaction.reply({
           content: "❌ You cannot ban yourself!",
@@ -87,7 +85,6 @@ export default {
         });
       }
 
-      // Check role hierarchy
       if (
         moderator.roles.highest.position <=
           targetMember.roles.highest.position &&
@@ -100,7 +97,6 @@ export default {
         });
       }
 
-      // Check if target is the guild owner
       if (targetMember.id === interaction.guild.ownerId) {
         return await interaction.reply({
           content: "❌ You cannot ban the server owner!",
@@ -109,7 +105,6 @@ export default {
       }
     }
 
-    // Check if user is already banned
     try {
       const existingBan = await interaction.guild.bans.fetch(targetUser.id);
       if (existingBan) {
@@ -118,51 +113,77 @@ export default {
           ephemeral: true,
         });
       }
-    } catch (error) {
-      // User is not banned, continue
-    }
+    } catch (error) {}
 
     try {
-      // Try to DM the user before banning (only if they're in the server)
       if (targetMember) {
         try {
           await targetUser.send({
             content: `🔨 You have been banned from **${interaction.guild.name}**\n**Reason:** ${reason}`,
           });
         } catch (error) {
-          // User has DMs disabled or blocked the bot
           console.log("Could not DM user about ban:", error);
         }
       }
 
-      // Perform the ban
       await interaction.guild.bans.create(targetUser.id, {
         reason,
         deleteMessageDays: deleteDays,
       });
 
-      // Create moderation action for logging
       const moderationAction: ModerationAction = {
-        type: "ban",
+        type: ModActionType.BAN,
         target: targetUser,
         moderator: interaction.user,
         reason,
         guild: interaction.guild,
       };
 
-      // Log the action
-      await moderationService.logModerationAction(moderationAction);
+      const modCase = await moderationService.logModerationAction(
+        interaction.client,
+        moderationAction
+      );
 
-      let responseMessage = `🔨 Successfully banned **${targetUser.tag}** from the server!\n**Reason:** ${reason}`;
+      const responseEmbed = new EmbedBuilder()
+        .setTitle("🔨 Ban Executed Successfully")
+        .setColor(0x00ff00)
+        .addFields(
+          {
+            name: "📋 Case Number",
+            value: `#${modCase.caseNumber}`,
+            inline: true,
+          },
+          {
+            name: "🎯 Banned User",
+            value: `${targetUser.tag}\n<@${targetUser.id}>`,
+            inline: true,
+          },
+          {
+            name: "👮 Moderator",
+            value: `${interaction.user.tag}\n<@${interaction.user.id}>`,
+            inline: true,
+          },
+          {
+            name: "📝 Reason",
+            value: reason,
+            inline: false,
+          }
+        )
+        .setTimestamp()
+        .setFooter({
+          text: `Target ID: ${targetUser.id} • Moderator ID: ${interaction.user.id}`,
+        });
 
       if (deleteDays > 0) {
-        responseMessage += `\n**Messages deleted:** ${deleteDays} day${
-          deleteDays === 1 ? "" : "s"
-        }`;
+        responseEmbed.addFields({
+          name: "🗑️ Messages Deleted",
+          value: `${deleteDays} day${deleteDays === 1 ? "" : "s"}`,
+          inline: true,
+        });
       }
 
       await interaction.reply({
-        content: responseMessage,
+        embeds: [responseEmbed],
       });
     } catch (error) {
       console.error("Error banning member:", error);

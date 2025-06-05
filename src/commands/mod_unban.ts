@@ -59,7 +59,6 @@ export default {
     const reason =
       interaction.options.getString("reason") || "No reason provided";
 
-    // Validate user ID format
     if (!/^\d{17,19}$/.test(userId)) {
       return await interaction.reply({
         content: "❌ Invalid user ID format!",
@@ -68,7 +67,6 @@ export default {
     }
 
     try {
-      // Check if user is actually banned
       const banInfo = await interaction.guild.bans.fetch(userId);
       if (!banInfo) {
         return await interaction.reply({
@@ -79,7 +77,6 @@ export default {
 
       const targetUser = banInfo.user;
 
-      // Unban the user
       await interaction.guild.bans.remove(userId, reason);
 
       const moderationAction: ModerationAction = {
@@ -131,7 +128,6 @@ export default {
     } catch (error) {
       console.error("Error unbanning user:", error);
 
-      // Check if it's a "not banned" error
       if (error instanceof Error && error.message.includes("10026")) {
         return await interaction.reply({
           content: "❌ This user is not banned!",

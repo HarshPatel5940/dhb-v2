@@ -9,14 +9,14 @@ import { ModerationService } from "../service-classes/ModHelper.js";
 
 export default {
   name: Events.GuildMemberAdd,
-  once: false, // Changed to false so it runs for every new member
+  once: false,
 
   execute: async (member: GuildMember, Client: Client) => {
     try {
       const guildSettings = await ModerationService.getGuild(member.guild.id);
 
       if (!guildSettings?.welcomeChannelId) {
-        return; // No welcome channel configured
+        return;
       }
 
       const welcomeChannel = member.guild.channels.cache.get(
@@ -24,7 +24,7 @@ export default {
       );
 
       if (!welcomeChannel || welcomeChannel.type !== ChannelType.GuildText) {
-        return; // Channel doesn't exist or isn't a text channel
+        return;
       }
 
       const botMember = member.guild.members.me;
@@ -36,17 +36,19 @@ export default {
         console.warn(
           `Bot does not have permission to send messages in ${welcomeChannel.name}`,
         );
-        return; // Bot can't send messages in the channel
+        return;
       }
 
       const embed = new EmbedBuilder()
         .setColor(0x00ff00)
         .setTitle("👋 Welcome to the Server!")
-        .setDescription(`Welcome to **${member.guild.name}**, ${member}!`)
+        .setDescription(`You are member #${member.guild.memberCount}`)
         .addFields([
           {
-            name: "🎉 Member Count",
-            value: `You are member #${member.guild.memberCount}`,
+            name: "🎉 Account Joining",
+            value: member.joinedTimestamp
+              ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:R>`
+              : "Unknown",
             inline: true,
           },
           {
@@ -66,7 +68,10 @@ export default {
           text: `User ID: ${member.id}`,
         });
 
-      await welcomeChannel.send({ embeds: [embed] });
+      await welcomeChannel.send({
+        content: `Welcome to **${member.guild.name}**, <@${member.id}>!`,
+        embeds: [embed],
+      });
     } catch (error) {
       console.error("Error sending welcome message:", error);
     }

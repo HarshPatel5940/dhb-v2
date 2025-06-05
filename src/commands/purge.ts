@@ -77,7 +77,6 @@ export default {
       });
     }
 
-    // Check bot permissions
     const botMember = interaction.guild.members.me;
     if (!botMember?.permissions.has(PermissionFlagsBits.ManageMessages)) {
       return await interaction.reply({
@@ -90,25 +89,21 @@ export default {
     try {
       await interaction.deferReply({ ephemeral: true });
 
-      // Fetch messages
       const messages = await channel.messages.fetch({ limit: amount });
       let messagesToDelete = Array.from(messages.values());
 
-      // Filter messages based on type
       if (type === "bot") {
         messagesToDelete = messagesToDelete.filter(msg => msg.author.bot);
       } else if (type === "user") {
         messagesToDelete = messagesToDelete.filter(msg => !msg.author.bot);
       }
 
-      // Filter by specific user if provided
       if (targetUser) {
         messagesToDelete = messagesToDelete.filter(
           msg => msg.author.id === targetUser.id,
         );
       }
 
-      // Filter out messages older than 14 days (Discord limitation)
       const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
       const validMessages = messagesToDelete.filter(
         msg => msg.createdTimestamp > twoWeeksAgo,
@@ -126,7 +121,6 @@ export default {
 
       let deletedCount = 0;
 
-      // Bulk delete messages newer than 14 days
       if (validMessages.length > 1) {
         const deleted = await channel.bulkDelete(validMessages, true);
         deletedCount += deleted.size;
@@ -135,20 +129,17 @@ export default {
         deletedCount += 1;
       }
 
-      // Delete old messages individually
       for (const oldMessage of oldMessages.slice(0, 10)) {
-        // Limit to 10 to avoid rate limits
         try {
           await oldMessage.delete();
           deletedCount += 1;
-          // Small delay to avoid rate limits
+
           await new Promise(resolve => setTimeout(resolve, 100));
         } catch (error) {
           console.log("Could not delete old message:", error);
         }
       }
 
-      // Create response embed
       const embed = new EmbedBuilder()
         .setTitle("🧹 Messages Purged Successfully")
         .setColor(0x00ff00)
@@ -201,12 +192,10 @@ export default {
         embeds: [embed],
       });
 
-      // Send a temporary message to the channel that auto-deletes
       const tempMessage = await channel.send({
         content: `🧹 **${deletedCount}** messages were deleted by ${interaction.user.tag}`,
       });
 
-      // Delete the temporary message after 5 seconds
       setTimeout(async () => {
         try {
           await tempMessage.delete();

@@ -104,14 +104,6 @@ export default {
     }
 
     try {
-      try {
-        await targetUser.send({
-          content: `👢 You have been kicked from **${interaction.guild.name}**\n**Reason:** ${reason}`,
-        });
-      } catch (error) {
-        console.log("Could not DM user about kick:", error);
-      }
-
       await targetMember.kick(reason);
 
       const moderationAction: ModerationAction = {

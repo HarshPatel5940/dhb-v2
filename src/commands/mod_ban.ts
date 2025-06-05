@@ -119,16 +119,6 @@ export default {
     } catch (error) {}
 
     try {
-      if (targetMember) {
-        try {
-          await targetUser.send({
-            content: `🔨 You have been banned from **${interaction.guild.name}**\n**Reason:** ${reason}`,
-          });
-        } catch (error) {
-          console.log("Could not DM user about ban:", error);
-        }
-      }
-
       await interaction.guild.bans.create(targetUser.id, {
         reason,
         deleteMessageDays: deleteDays,

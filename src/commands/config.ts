@@ -87,6 +87,33 @@ export default {
             )
             .setRequired(false),
         ),
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName("set-welcome-channel")
+        .setDescription("Set the welcome channel for new member messages")
+        .addChannelOption(option =>
+          option
+            .setName("channel")
+            .setDescription(
+              "Channel for welcome messages (leave empty to remove)",
+            )
+            .setRequired(false)
+            .addChannelTypes(ChannelType.GuildText),
+        ),
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName("set-main-role")
+        .setDescription("Set the main role for lockdown operations")
+        .addRoleOption(option =>
+          option
+            .setName("role")
+            .setDescription(
+              "Main role for lockdown system (leave empty to remove)",
+            )
+            .setRequired(false),
+        ),
     ),
 
   async execute(interaction: ChatInputCommandInteraction) {
@@ -121,6 +148,12 @@ export default {
           break;
         case "set-mod-role":
           await handleModRole(interaction);
+          break;
+        case "set-welcome-channel":
+          await handleWelcomeChannel(interaction);
+          break;
+        case "set-main-role":
+          await handleMainRole(interaction);
           break;
         default:
           await interaction.reply({
@@ -181,6 +214,18 @@ async function handleView(interaction: ChatInputCommandInteraction) {
         value: `${settings.CurrentCounter || 0} / ${
           settings.GoalCounter || 100
         }`,
+        inline: true,
+      },
+      {
+        name: "👋 Welcome Channel",
+        value: settings.welcomeChannelId
+          ? `<#${settings.welcomeChannelId}>`
+          : "Not set",
+        inline: true,
+      },
+      {
+        name: "🔒 Main Role",
+        value: settings.mainRoleId ? `<@&${settings.mainRoleId}>` : "Not set",
         inline: true,
       },
       {
@@ -438,6 +483,58 @@ async function handleModRole(interaction: ChatInputCommandInteraction) {
     await interaction.reply({
       content:
         "✅ Moderator role restriction removed! Users with Discord permissions can use moderation commands.",
+    });
+  }
+}
+
+async function handleWelcomeChannel(interaction: ChatInputCommandInteraction) {
+  if (!interaction.guild) return;
+
+  const channel = interaction.options.getChannel("channel");
+
+  if (channel && channel.type !== ChannelType.GuildText) {
+    return await interaction.reply({
+      content: "❌ Invalid channel! Please select a text channel.",
+      ephemeral: true,
+    });
+  }
+
+  await ModerationService.getOrCreateGuild(interaction.guild.id);
+  await prisma.guild.update({
+    where: { id: interaction.guild.id },
+    data: { welcomeChannelId: channel?.id || null },
+  });
+
+  if (channel) {
+    await interaction.reply({
+      content: `✅ Welcome channel set to ${channel}! New members will receive welcome messages there.`,
+    });
+  } else {
+    await interaction.reply({
+      content: "✅ Welcome channel removed! Welcome messages are disabled.",
+    });
+  }
+}
+
+async function handleMainRole(interaction: ChatInputCommandInteraction) {
+  if (!interaction.guild) return;
+
+  const role = interaction.options.getRole("role");
+
+  await ModerationService.getOrCreateGuild(interaction.guild.id);
+  await prisma.guild.update({
+    where: { id: interaction.guild.id },
+    data: { mainRoleId: role?.id || null },
+  });
+
+  if (role) {
+    await interaction.reply({
+      content: `✅ Main role set to **${role.name}**! This role will be used for lockdown operations.`,
+    });
+  } else {
+    await interaction.reply({
+      content:
+        "✅ Main role removed! Lockdown operations will use default behavior.",
     });
   }
 }

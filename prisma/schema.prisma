@@ -24,6 +24,9 @@ model Guild {
   GoalCounter      Int     @default(1000)
   CounterChannelId String?
 
+  welcomeChannelId String?
+  mainRoleId       String?
+
   MusicSettings MusicSettings?
   ModCases      ModCases[]
 

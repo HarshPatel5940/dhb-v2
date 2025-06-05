@@ -49,6 +49,8 @@ interface PrismaGuild {
   CurrentCounter: number | null;
   GoalCounter: number | null;
   CounterChannelId: string | null;
+  welcomeChannelId: string | null;
+  mainRoleId: string | null;
 }
 
 interface PrismaModCase {

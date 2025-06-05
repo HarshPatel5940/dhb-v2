@@ -26,47 +26,47 @@ export default {
     .setName("cases")
     .setDescription("View moderation cases")
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("info")
         .setDescription("Get detailed information about a specific case")
-        .addIntegerOption((option) =>
+        .addIntegerOption(option =>
           option
             .setName("case-number")
             .setDescription("The case number to look up")
             .setRequired(true)
-            .setMinValue(1)
-        )
+            .setMinValue(1),
+        ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("user")
         .setDescription("View cases for a specific user")
-        .addUserOption((option) =>
+        .addUserOption(option =>
           option
             .setName("user")
             .setDescription("The user to view cases for")
-            .setRequired(true)
+            .setRequired(true),
         )
-        .addIntegerOption((option) =>
+        .addIntegerOption(option =>
           option
             .setName("page")
             .setDescription("Page number (each page shows 10 cases)")
             .setRequired(false)
-            .setMinValue(1)
-        )
+            .setMinValue(1),
+        ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("recent")
         .setDescription("View recent moderation cases")
-        .addIntegerOption((option) =>
+        .addIntegerOption(option =>
           option
             .setName("page")
             .setDescription("Page number (each page shows 10 cases)")
             .setRequired(false)
-            .setMinValue(1)
-        )
+            .setMinValue(1),
+        ),
     )
     .setDMPermission(false),
 
@@ -83,7 +83,7 @@ export default {
 
     const hasModPerms = await moderationService.hasModPermissions(
       interaction.guild.id,
-      moderator
+      moderator,
     );
 
     if (!hasModPerms) {
@@ -152,7 +152,7 @@ export default {
               name: "📅 Date",
               value: `<t:${Math.floor(modCase.createdAt.getTime() / 1000)}:F>`,
               inline: true,
-            }
+            },
           )
           .setTimestamp(modCase.createdAt)
           .setFooter({
@@ -202,12 +202,12 @@ export default {
               .map(
                 (c: ModCase) =>
                   `**#${c.caseNumber}** • ${c.action} • <t:${Math.floor(
-                    c.createdAt.getTime() / 1000
+                    c.createdAt.getTime() / 1000,
                   )}:R>\n${c.reason.substring(0, 50)}${
                     c.reason.length > 50 ? "..." : ""
-                  }`
+                  }`,
               )
-              .join("\n\n")
+              .join("\n\n"),
           )
           .setFooter({
             text: `Page ${page}/${totalPages} • Total cases: ${totalCases}`,
@@ -258,11 +258,11 @@ export default {
             return `**#${c.caseNumber}** • ${
               c.action
             } • ${userDisplay}\n<t:${Math.floor(
-              c.createdAt.getTime() / 1000
+              c.createdAt.getTime() / 1000,
             )}:R> • ${c.reason.substring(0, 40)}${
               c.reason.length > 40 ? "..." : ""
             }`;
-          })
+          }),
         );
 
         const embed = new EmbedBuilder()

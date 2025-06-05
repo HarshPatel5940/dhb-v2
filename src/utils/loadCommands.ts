@@ -23,7 +23,7 @@ export async function loadCommands() {
         console.log(`Failed to Load Event: ${file.split("/").pop()}`);
         console.error(err);
       }
-    }),
+    })
   );
   console.log(`Loaded ${commands.size} commands.`);
 }
@@ -36,20 +36,20 @@ export async function registerSlashCommands() {
       Routes.applicationCommands(config.CLIENT_ID),
       {
         body: commandsData,
-      },
+      }
     )) as unknown[];
     console.log(
-      `Successfully registered ${setCommands.length} application commands. (GLOBALLY)`,
+      `Successfully registered ${setCommands.length} application commands. (GLOBALLY)`
     );
   } else {
     const setCommands = (await rest.put(
       Routes.applicationGuildCommands(config.CLIENT_ID, config.DEV_GUILD_ID),
       {
         body: commandsData,
-      },
+      }
     )) as unknown[];
     console.log(
-      `Successfully registered ${setCommands.length} application commands. (DEVELOPMENT)`,
+      `Successfully registered ${setCommands.length} application commands. (DEVELOPMENT)`
     );
   }
 }

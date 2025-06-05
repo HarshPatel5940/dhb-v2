@@ -26,47 +26,47 @@ export default {
     .setName("cases")
     .setDescription("View moderation cases")
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("info")
         .setDescription("Get detailed information about a specific case")
-        .addIntegerOption(option =>
+        .addIntegerOption((option) =>
           option
             .setName("case-number")
             .setDescription("The case number to look up")
             .setRequired(true)
-            .setMinValue(1),
-        ),
+            .setMinValue(1)
+        )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("user")
         .setDescription("View cases for a specific user")
-        .addUserOption(option =>
+        .addUserOption((option) =>
           option
             .setName("user")
             .setDescription("The user to view cases for")
-            .setRequired(true),
+            .setRequired(true)
         )
-        .addIntegerOption(option =>
+        .addIntegerOption((option) =>
           option
             .setName("page")
             .setDescription("Page number (each page shows 10 cases)")
             .setRequired(false)
-            .setMinValue(1),
-        ),
+            .setMinValue(1)
+        )
     )
-    .addSubcommand(subcommand =>
+    .addSubcommand((subcommand) =>
       subcommand
         .setName("recent")
         .setDescription("View recent moderation cases")
-        .addIntegerOption(option =>
+        .addIntegerOption((option) =>
           option
             .setName("page")
             .setDescription("Page number (each page shows 10 cases)")
             .setRequired(false)
-            .setMinValue(1),
-        ),
+            .setMinValue(1)
+        )
     )
     .setDMPermission(false),
 
@@ -83,7 +83,7 @@ export default {
 
     const hasModPerms = await moderationService.hasModPermissions(
       interaction.guild.id,
-      moderator,
+      moderator
     );
 
     if (!hasModPerms) {
@@ -99,13 +99,12 @@ export default {
       if (subcommand === "info") {
         const caseNumber = interaction.options.getInteger("case-number", true);
 
-        // biome-ignore lint/suspicious/noExplicitAny: Prisma typing issue with MongoDB
-        const modCase = (await (prisma as any).modCases.findFirst({
+        const modCase = await prisma.modCases.findFirst({
           where: {
             guildId: interaction.guild.id,
             caseNumber: caseNumber,
           },
-        })) as ModCase | null;
+        });
 
         if (!modCase) {
           return await interaction.reply({
@@ -114,7 +113,6 @@ export default {
           });
         }
 
-        // Fetch user information
         const targetUser = await interaction.client.users
           .fetch(modCase.TargetUserID)
           .catch(() => null);
@@ -154,7 +152,7 @@ export default {
               name: "📅 Date",
               value: `<t:${Math.floor(modCase.createdAt.getTime() / 1000)}:F>`,
               inline: true,
-            },
+            }
           )
           .setTimestamp(modCase.createdAt)
           .setFooter({
@@ -170,8 +168,7 @@ export default {
         const limit = 10;
         const offset = (page - 1) * limit;
 
-        // biome-ignore lint/suspicious/noExplicitAny: Prisma typing issue with MongoDB
-        const userCases = (await (prisma as any).modCases.findMany({
+        const userCases = await prisma.modCases.findMany({
           where: {
             guildId: interaction.guild.id,
             TargetUserID: targetUser.id,
@@ -179,15 +176,14 @@ export default {
           orderBy: { createdAt: "desc" },
           take: limit,
           skip: offset,
-        })) as ModCase[];
+        });
 
-        // biome-ignore lint/suspicious/noExplicitAny: Prisma typing issue with MongoDB
-        const totalCases = (await (prisma as any).modCases.count({
+        const totalCases = await prisma.modCases.count({
           where: {
             guildId: interaction.guild.id,
             TargetUserID: targetUser.id,
           },
-        })) as number;
+        });
 
         if (userCases.length === 0) {
           return await interaction.reply({
@@ -206,12 +202,12 @@ export default {
               .map(
                 (c: ModCase) =>
                   `**#${c.caseNumber}** • ${c.action} • <t:${Math.floor(
-                    c.createdAt.getTime() / 1000,
+                    c.createdAt.getTime() / 1000
                   )}:R>\n${c.reason.substring(0, 50)}${
                     c.reason.length > 50 ? "..." : ""
-                  }`,
+                  }`
               )
-              .join("\n\n"),
+              .join("\n\n")
           )
           .setFooter({
             text: `Page ${page}/${totalPages} • Total cases: ${totalCases}`,
@@ -226,22 +222,20 @@ export default {
         const limit = 10;
         const offset = (page - 1) * limit;
 
-        // biome-ignore lint/suspicious/noExplicitAny: Prisma typing issue with MongoDB
-        const recentCases = (await (prisma as any).modCases.findMany({
+        const recentCases = await prisma.modCases.findMany({
           where: {
             guildId: interaction.guild.id,
           },
           orderBy: { createdAt: "desc" },
           take: limit,
           skip: offset,
-        })) as ModCase[];
+        });
 
-        // biome-ignore lint/suspicious/noExplicitAny: Prisma typing issue with MongoDB
-        const totalCases = (await (prisma as any).modCases.count({
+        const totalCases = await prisma.modCases.count({
           where: {
             guildId: interaction.guild.id,
           },
-        })) as number;
+        });
 
         if (recentCases.length === 0) {
           return await interaction.reply({
@@ -264,11 +258,11 @@ export default {
             return `**#${c.caseNumber}** • ${
               c.action
             } • ${userDisplay}\n<t:${Math.floor(
-              c.createdAt.getTime() / 1000,
+              c.createdAt.getTime() / 1000
             )}:R> • ${c.reason.substring(0, 40)}${
               c.reason.length > 40 ? "..." : ""
             }`;
-          }),
+          })
         );
 
         const embed = new EmbedBuilder()

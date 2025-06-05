@@ -17,23 +17,26 @@ export default {
     .setName("ban")
     .setDescription("Ban a member from the server")
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
-    .addUserOption((option) =>
-      option.setName("user").setDescription("The user to ban").setRequired(true)
+    .addUserOption(option =>
+      option
+        .setName("user")
+        .setDescription("The user to ban")
+        .setRequired(true),
     )
-    .addStringOption((option) =>
+    .addStringOption(option =>
       option
         .setName("reason")
         .setDescription("Reason for the ban")
         .setRequired(false)
-        .setMaxLength(512)
+        .setMaxLength(512),
     )
-    .addIntegerOption((option) =>
+    .addIntegerOption(option =>
       option
         .setName("delete-days")
         .setDescription("Number of days of messages to delete (0-7)")
         .setRequired(false)
         .setMinValue(0)
-        .setMaxValue(7)
+        .setMaxValue(7),
     )
     .setDMPermission(false),
 
@@ -50,7 +53,7 @@ export default {
 
     const hasModPerms = await moderationService.hasModPermissions(
       interaction.guild.id,
-      moderator
+      moderator,
     );
 
     if (!hasModPerms) {
@@ -141,7 +144,7 @@ export default {
 
       const modCase = await moderationService.logModerationAction(
         interaction.client,
-        moderationAction
+        moderationAction,
       );
 
       const responseEmbed = new EmbedBuilder()
@@ -167,7 +170,7 @@ export default {
             name: "📝 Reason",
             value: reason,
             inline: false,
-          }
+          },
         )
         .setTimestamp()
         .setFooter({

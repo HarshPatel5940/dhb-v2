@@ -46,6 +46,9 @@ interface PrismaGuild {
   modRoleId: string | null;
   modLogWebhookUrl: string | null;
   serverLogWebhookUrl: string | null;
+  CurrentCounter: number | null;
+  GoalCounter: number | null;
+  CounterChannelId: string | null;
 }
 
 interface PrismaModCase {
@@ -73,16 +76,13 @@ export class ModerationService {
 
   public static async updateModerationSettings(
     guildId: string,
-    updates: Partial<
-      Pick<
-        PrismaGuild,
-        | "modLogChannelID"
-        | "modRoleId"
-        | "modLogWebhookUrl"
-        | "serverLogChannelID"
-        | "serverLogWebhookUrl"
-      >
-    >
+    updates: {
+      modLogChannelID?: string | null;
+      modRoleId?: string | null;
+      modLogWebhookUrl?: string | null;
+      serverLogChannelID?: string | null;
+      serverLogWebhookUrl?: string | null;
+    },
   ): Promise<PrismaGuild> {
     await ModerationService.getOrCreateGuild(guildId);
 
@@ -93,7 +93,7 @@ export class ModerationService {
   }
 
   public static async getOrCreateModerationSettings(
-    guildId: string
+    guildId: string,
   ): Promise<PrismaGuild> {
     return await ModerationService.getOrCreateGuild(guildId);
   }
@@ -105,18 +105,16 @@ export class ModerationService {
   }
 
   public static async createModCase(
-    data: Omit<ModCaseData, "caseNumber">
+    data: Omit<ModCaseData, "caseNumber">,
   ): Promise<PrismaModCase> {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    const lastCase = await (prisma as any).modCases.findFirst({
+    const lastCase = await prisma.modCases.findFirst({
       where: { guildId: data.guildId },
       orderBy: { caseNumber: "desc" },
     });
 
     const nextCaseNumber = (lastCase?.caseNumber || 0) + 1;
 
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    return (await (prisma as any).modCases.create({
+    return (await prisma.modCases.create({
       data: {
         caseNumber: nextCaseNumber,
         TargetUserID: data.targetUserId,
@@ -130,10 +128,9 @@ export class ModerationService {
 
   public static async getModCases(
     guildId: string,
-    limit = 10
+    limit = 10,
   ): Promise<PrismaModCase[]> {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    return (await (prisma as any).modCases.findMany({
+    return (await prisma.modCases.findMany({
       where: { guildId },
       orderBy: { createdAt: "desc" },
       take: limit,
@@ -142,10 +139,9 @@ export class ModerationService {
 
   public static async getUserModCases(
     guildId: string,
-    userId: string
+    userId: string,
   ): Promise<PrismaModCase[]> {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    return (await (prisma as any).modCases.findMany({
+    return (await prisma.modCases.findMany({
       where: {
         guildId,
         TargetUserID: userId,
@@ -156,7 +152,7 @@ export class ModerationService {
 
   public static async sendToModLog(
     guildId: string,
-    payload: { embeds: DiscordEmbedBuilder[] }
+    payload: { embeds: DiscordEmbedBuilder[] },
   ): Promise<void> {
     try {
       const guild = await ModerationService.getGuild(guildId);
@@ -171,13 +167,13 @@ export class ModerationService {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          embeds: payload.embeds.map((embed) => embed.toJSON()),
+          embeds: payload.embeds.map(embed => embed.toJSON()),
         }),
       });
 
       if (!response.ok) {
         console.error(
-          `Failed to send moderation log: ${response.status} ${response.statusText}`
+          `Failed to send moderation log: ${response.status} ${response.statusText}`,
         );
       }
     } catch (error) {
@@ -187,7 +183,7 @@ export class ModerationService {
 
   public async hasModPermissions(
     guildId: string,
-    member: GuildMember
+    member: GuildMember,
   ): Promise<boolean> {
     const guild = await ModerationService.getGuild(guildId);
 
@@ -210,7 +206,7 @@ export class ModerationService {
 
   public async logModerationAction(
     client: Client,
-    action: ModerationAction
+    action: ModerationAction,
   ): Promise<PrismaModCase> {
     try {
       const modCase = await ModerationService.createModCase({
@@ -229,7 +225,7 @@ export class ModerationService {
       const embed = modActionEmbedBuilderFunction(
         action,
         modCase.caseNumber,
-        modCase.createdAt
+        modCase.createdAt,
       );
 
       let WClient = this.WebhookClientMap.get(guild.id);
@@ -299,7 +295,7 @@ export class ModerationService {
 export function modActionEmbedBuilderFunction(
   action: ModerationAction,
   caseNumber?: number,
-  createdAt?: Date
+  createdAt?: Date,
 ): DiscordEmbedBuilder {
   const timestamp = createdAt || new Date();
 
@@ -309,7 +305,6 @@ export function modActionEmbedBuilderFunction(
     } • Moderator ID: ${action.moderator.id}`,
   });
 
-  // Base fields that appear in all embeds based on schema
   const baseFields = [
     {
       name: "🎯 Target User",
@@ -323,7 +318,6 @@ export function modActionEmbedBuilderFunction(
     },
   ];
 
-  // Add case number field if available
   if (caseNumber) {
     baseFields.unshift({
       name: "📋 Case Number",
@@ -373,7 +367,7 @@ export function modActionEmbedBuilderFunction(
             name: "📝 Reason",
             value: action.reason || "No reason provided",
             inline: false,
-          }
+          },
         );
       break;
     }
@@ -437,7 +431,7 @@ export function modActionEmbedBuilderFunction(
             name: "📝 Reason",
             value: action.reason || "No reason provided",
             inline: false,
-          }
+          },
         );
       break;
   }

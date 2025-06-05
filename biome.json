@@ -29,7 +29,9 @@
 			"semicolons": "always",
 			"arrowParentheses": "asNeeded",
 			"bracketSpacing": true,
-			"bracketSameLine": false
+			"bracketSameLine": false,
+			"indentWidth": 2,
+			"indentStyle": "space"
 		}
 	}
 }

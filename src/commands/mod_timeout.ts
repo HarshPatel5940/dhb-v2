@@ -17,47 +17,47 @@ export default {
     .setName("timeout")
     .setDescription("Timeout or remove timeout from a user")
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("add")
         .setDescription("Timeout a user")
-        .addUserOption((option) =>
+        .addUserOption(option =>
           option
             .setName("user")
             .setDescription("The user to timeout")
-            .setRequired(true)
+            .setRequired(true),
         )
-        .addIntegerOption((option) =>
+        .addIntegerOption(option =>
           option
             .setName("duration")
             .setDescription("Duration in minutes (1-40320, max 28 days)")
             .setRequired(true)
             .setMinValue(1)
-            .setMaxValue(40320)
+            .setMaxValue(40320),
         )
-        .addStringOption((option) =>
+        .addStringOption(option =>
           option
             .setName("reason")
             .setDescription("Reason for the timeout")
-            .setRequired(false)
-        )
+            .setRequired(false),
+        ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("remove")
         .setDescription("Remove timeout from a user")
-        .addUserOption((option) =>
+        .addUserOption(option =>
           option
             .setName("user")
             .setDescription("The user to remove timeout from")
-            .setRequired(true)
+            .setRequired(true),
         )
-        .addStringOption((option) =>
+        .addStringOption(option =>
           option
             .setName("reason")
             .setDescription("Reason for removing the timeout")
-            .setRequired(false)
-        )
+            .setRequired(false),
+        ),
     )
     .setDMPermission(false),
 
@@ -135,7 +135,7 @@ async function handleTimeoutAdd(interaction: ChatInputCommandInteraction) {
 
     await member.timeout(
       duration * 60 * 1000,
-      `${reason} | Timed out by ${interaction.user.tag}`
+      `${reason} | Timed out by ${interaction.user.tag}`,
     );
 
     const moderationService = new ModerationService();
@@ -150,7 +150,7 @@ async function handleTimeoutAdd(interaction: ChatInputCommandInteraction) {
 
     const modCase = await moderationService.logModerationAction(
       interaction.client,
-      moderationAction
+      moderationAction,
     );
 
     const responseEmbed = new EmbedBuilder()
@@ -186,7 +186,7 @@ async function handleTimeoutAdd(interaction: ChatInputCommandInteraction) {
           name: "📝 Reason",
           value: reason,
           inline: false,
-        }
+        },
       )
       .setTimestamp()
       .setFooter({
@@ -256,7 +256,7 @@ async function handleTimeoutRemove(interaction: ChatInputCommandInteraction) {
   try {
     await member.timeout(
       null,
-      `${reason} | Timeout removed by ${interaction.user.tag}`
+      `${reason} | Timeout removed by ${interaction.user.tag}`,
     );
 
     const moderationService = new ModerationService();
@@ -270,7 +270,7 @@ async function handleTimeoutRemove(interaction: ChatInputCommandInteraction) {
 
     const modCase = await moderationService.logModerationAction(
       interaction.client,
-      moderationAction
+      moderationAction,
     );
 
     const responseEmbed = new EmbedBuilder()
@@ -296,7 +296,7 @@ async function handleTimeoutRemove(interaction: ChatInputCommandInteraction) {
           name: "📝 Reason",
           value: reason,
           inline: false,
-        }
+        },
       )
       .setTimestamp()
       .setFooter({

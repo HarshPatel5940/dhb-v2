@@ -14,20 +14,20 @@ import {
 
 export default {
   data: new SlashCommandBuilder()
-    .setName("kick")
-    .setDescription("Kick a member from the server")
-    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
+    .setName("warn")
+    .setDescription("Warn a member in the server")
+    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addUserOption(option =>
       option
         .setName("user")
-        .setDescription("The user to kick")
+        .setDescription("The user to warn")
         .setRequired(true),
     )
     .addStringOption(option =>
       option
         .setName("reason")
-        .setDescription("Reason for the kick")
-        .setRequired(false)
+        .setDescription("Reason for the warning")
+        .setRequired(true)
         .setMaxLength(512),
     )
     .setDMPermission(false),
@@ -56,66 +56,43 @@ export default {
     }
 
     const targetUser = interaction.options.getUser("user", true);
-    const reason =
-      interaction.options.getString("reason") || "No reason provided";
+    const reason = interaction.options.getString("reason", true);
 
     const targetMember = await interaction.guild.members
       .fetch(targetUser.id)
       .catch(() => null);
 
-    if (!targetMember) {
-      return await interaction.reply({
-        content: "❌ User not found in this server!",
-        ephemeral: true,
-      });
-    }
+    if (targetMember) {
+      if (targetMember.id === moderator.id) {
+        return await interaction.reply({
+          content: "❌ You cannot warn yourself!",
+          ephemeral: true,
+        });
+      }
 
-    if (!targetMember.kickable) {
-      return await interaction.reply({
-        content:
-          "❌ I cannot kick this member! They may have higher permissions than me.",
-        ephemeral: true,
-      });
-    }
+      if (
+        moderator.roles.highest.position <=
+          targetMember.roles.highest.position &&
+        interaction.guild.ownerId !== moderator.id
+      ) {
+        return await interaction.reply({
+          content:
+            "❌ You cannot warn this member! They have equal or higher permissions than you.",
+          ephemeral: true,
+        });
+      }
 
-    if (targetMember.id === moderator.id) {
-      return await interaction.reply({
-        content: "❌ You cannot kick yourself!",
-        ephemeral: true,
-      });
-    }
-
-    if (
-      moderator.roles.highest.position <= targetMember.roles.highest.position &&
-      interaction.guild.ownerId !== moderator.id
-    ) {
-      return await interaction.reply({
-        content:
-          "❌ You cannot kick this member! They have equal or higher permissions than you.",
-        ephemeral: true,
-      });
-    }
-
-    if (targetMember.id === interaction.guild.ownerId) {
-      return await interaction.reply({
-        content: "❌ You cannot kick the server owner!",
-        ephemeral: true,
-      });
+      if (targetMember.id === interaction.guild.ownerId) {
+        return await interaction.reply({
+          content: "❌ You cannot warn the server owner!",
+          ephemeral: true,
+        });
+      }
     }
 
     try {
-      try {
-        await targetUser.send({
-          content: `👢 You have been kicked from **${interaction.guild.name}**\n**Reason:** ${reason}`,
-        });
-      } catch (error) {
-        console.log("Could not DM user about kick:", error);
-      }
-
-      await targetMember.kick(reason);
-
       const moderationAction: ModerationAction = {
-        type: ModActionType.KICK,
+        type: ModActionType.WARN,
         target: targetUser,
         moderator: interaction.user,
         reason,
@@ -128,8 +105,8 @@ export default {
       );
 
       const responseEmbed = new EmbedBuilder()
-        .setTitle("👢 Kick Executed Successfully")
-        .setColor(0x00ff00)
+        .setTitle("⚠️ Warning Issued Successfully")
+        .setColor(0xffff00)
         .addFields(
           {
             name: "📋 Case Number",
@@ -137,7 +114,7 @@ export default {
             inline: true,
           },
           {
-            name: "🎯 Kicked User",
+            name: "🎯 Warned User",
             value: `${targetUser.tag}\n<@${targetUser.id}>`,
             inline: true,
           },
@@ -161,9 +138,9 @@ export default {
         embeds: [responseEmbed],
       });
     } catch (error) {
-      console.error("Error kicking member:", error);
+      console.error("Error warning member:", error);
       await interaction.reply({
-        content: "❌ An error occurred while trying to kick the member!",
+        content: "❌ An error occurred while trying to warn the member!",
         ephemeral: true,
       });
     }

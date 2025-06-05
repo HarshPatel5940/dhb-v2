@@ -14,19 +14,19 @@ import {
 
 export default {
   data: new SlashCommandBuilder()
-    .setName("kick")
-    .setDescription("Kick a member from the server")
-    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
-    .addUserOption(option =>
+    .setName("unban")
+    .setDescription("Unban a user from the server")
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+    .addStringOption(option =>
       option
-        .setName("user")
-        .setDescription("The user to kick")
+        .setName("user-id")
+        .setDescription("The ID of the user to unban")
         .setRequired(true),
     )
     .addStringOption(option =>
       option
         .setName("reason")
-        .setDescription("Reason for the kick")
+        .setDescription("Reason for the unban")
         .setRequired(false)
         .setMaxLength(512),
     )
@@ -55,67 +55,35 @@ export default {
       });
     }
 
-    const targetUser = interaction.options.getUser("user", true);
+    const userId = interaction.options.getString("user-id", true);
     const reason =
       interaction.options.getString("reason") || "No reason provided";
 
-    const targetMember = await interaction.guild.members
-      .fetch(targetUser.id)
-      .catch(() => null);
-
-    if (!targetMember) {
+    // Validate user ID format
+    if (!/^\d{17,19}$/.test(userId)) {
       return await interaction.reply({
-        content: "❌ User not found in this server!",
-        ephemeral: true,
-      });
-    }
-
-    if (!targetMember.kickable) {
-      return await interaction.reply({
-        content:
-          "❌ I cannot kick this member! They may have higher permissions than me.",
-        ephemeral: true,
-      });
-    }
-
-    if (targetMember.id === moderator.id) {
-      return await interaction.reply({
-        content: "❌ You cannot kick yourself!",
-        ephemeral: true,
-      });
-    }
-
-    if (
-      moderator.roles.highest.position <= targetMember.roles.highest.position &&
-      interaction.guild.ownerId !== moderator.id
-    ) {
-      return await interaction.reply({
-        content:
-          "❌ You cannot kick this member! They have equal or higher permissions than you.",
-        ephemeral: true,
-      });
-    }
-
-    if (targetMember.id === interaction.guild.ownerId) {
-      return await interaction.reply({
-        content: "❌ You cannot kick the server owner!",
+        content: "❌ Invalid user ID format!",
         ephemeral: true,
       });
     }
 
     try {
-      try {
-        await targetUser.send({
-          content: `👢 You have been kicked from **${interaction.guild.name}**\n**Reason:** ${reason}`,
+      // Check if user is actually banned
+      const banInfo = await interaction.guild.bans.fetch(userId);
+      if (!banInfo) {
+        return await interaction.reply({
+          content: "❌ This user is not banned!",
+          ephemeral: true,
         });
-      } catch (error) {
-        console.log("Could not DM user about kick:", error);
       }
 
-      await targetMember.kick(reason);
+      const targetUser = banInfo.user;
+
+      // Unban the user
+      await interaction.guild.bans.remove(userId, reason);
 
       const moderationAction: ModerationAction = {
-        type: ModActionType.KICK,
+        type: ModActionType.UNBAN,
         target: targetUser,
         moderator: interaction.user,
         reason,
@@ -128,7 +96,7 @@ export default {
       );
 
       const responseEmbed = new EmbedBuilder()
-        .setTitle("👢 Kick Executed Successfully")
+        .setTitle("🔓 Unban Executed Successfully")
         .setColor(0x00ff00)
         .addFields(
           {
@@ -137,7 +105,7 @@ export default {
             inline: true,
           },
           {
-            name: "🎯 Kicked User",
+            name: "🎯 Unbanned User",
             value: `${targetUser.tag}\n<@${targetUser.id}>`,
             inline: true,
           },
@@ -161,9 +129,18 @@ export default {
         embeds: [responseEmbed],
       });
     } catch (error) {
-      console.error("Error kicking member:", error);
+      console.error("Error unbanning user:", error);
+
+      // Check if it's a "not banned" error
+      if (error instanceof Error && error.message.includes("10026")) {
+        return await interaction.reply({
+          content: "❌ This user is not banned!",
+          ephemeral: true,
+        });
+      }
+
       await interaction.reply({
-        content: "❌ An error occurred while trying to kick the member!",
+        content: "❌ An error occurred while trying to unban the user!",
         ephemeral: true,
       });
     }

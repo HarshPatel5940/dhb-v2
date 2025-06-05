@@ -20,6 +20,10 @@ model Guild {
   modLogWebhookUrl    String?
   serverLogWebhookUrl String?
 
+  CurrentCounter   Int     @default(0)
+  GoalCounter      Int     @default(1000)
+  CounterChannelId String?
+
   MusicSettings MusicSettings?
   ModCases      ModCases[]
 

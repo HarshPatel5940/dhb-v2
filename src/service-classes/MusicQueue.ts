@@ -68,7 +68,7 @@ export class MusicQueue extends EventEmitter {
     if (this.connected) return;
 
     console.log(
-      `🔗 Attempting to connect to voice channel ${this.voiceChannel.name} (${this.voiceChannel.id}) in guild ${this.guild.name} (${this.guild.id})`
+      `🔗 Attempting to connect to voice channel ${this.voiceChannel.name} (${this.voiceChannel.id}) in guild ${this.guild.name} (${this.guild.id})`,
     );
 
     try {
@@ -89,7 +89,7 @@ export class MusicQueue extends EventEmitter {
     } catch (error) {
       console.error(
         `❌ Failed to connect to voice channel in guild ${this.guild.id}:`,
-        error
+        error,
       );
       throw error;
     }
@@ -104,7 +104,7 @@ export class MusicQueue extends EventEmitter {
           | TrackStartEvent
           | TrackEndEvent
           | TrackStuckEvent
-          | WebSocketClosedEvent
+          | WebSocketClosedEvent,
       ) => {
         if (data.guildId !== this.guild.id) return;
 
@@ -127,7 +127,7 @@ export class MusicQueue extends EventEmitter {
             this.disconnect();
             break;
         }
-      }
+      },
     );
   }
 
@@ -147,10 +147,10 @@ export class MusicQueue extends EventEmitter {
       this.emit("trackEnd", finishedTrack);
     }
 
-    this.playNext().catch((error) => {
+    this.playNext().catch(error => {
       console.error(
         `Error playing next track in guild ${this.guild.id}:`,
-        error
+        error,
       );
       this.emit("error", error);
     });
@@ -298,7 +298,7 @@ export class MusicQueue extends EventEmitter {
     } catch (error) {
       console.error(
         `Failed to send now playing message in guild ${this.guild.id}:`,
-        error
+        error,
       );
     }
   }
@@ -328,7 +328,7 @@ export class MusicQueue extends EventEmitter {
     const upcoming = this.tracks.toArray();
     const totalDuration = upcoming.reduce(
       (acc, track) => acc + track.info.length,
-      0
+      0,
     );
 
     return {

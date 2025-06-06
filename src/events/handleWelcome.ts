@@ -19,7 +19,7 @@ export default {
       }
 
       const welcomeChannel = member.guild.channels.cache.get(
-        guildSettings.welcomeChannelId
+        guildSettings.welcomeChannelId,
       );
 
       if (!welcomeChannel || welcomeChannel.type !== ChannelType.GuildText) {
@@ -33,7 +33,7 @@ export default {
         !botMember.permissionsIn(welcomeChannel).has("SendMessages")
       ) {
         console.warn(
-          `Bot does not have permission to send messages in ${welcomeChannel.name}`
+          `Bot does not have permission to send messages in ${welcomeChannel.name}`,
         );
         return;
       }

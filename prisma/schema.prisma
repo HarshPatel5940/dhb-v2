@@ -13,9 +13,11 @@ model Guild {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  welcomeChannelId   String?
   modLogChannelID    String?
   serverLogChannelID String?
   modRoleId          String?
+  mainRoleId         String?
 
   modLogWebhookUrl    String?
   serverLogWebhookUrl String?
@@ -24,8 +26,8 @@ model Guild {
   GoalCounter      Int     @default(1000)
   CounterChannelId String?
 
-  welcomeChannelId String?
-  mainRoleId       String?
+  IsForceLockdown     Boolean @default(false)
+  ForcedLockdownArray Json[]  @default([])
 
   MusicSettings MusicSettings?
   ModCases      ModCases[]
@@ -57,7 +59,7 @@ model ModCases {
   guildId String
   guild   Guild  @relation(fields: [guildId], references: [id], onDelete: Cascade)
 
-  caseNumber      Int    @unique
+  caseNumber      Int
   TargetUserID    String
   ModeratorUserID String
 

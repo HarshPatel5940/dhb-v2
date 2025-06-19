@@ -29,6 +29,12 @@ model Guild {
   IsForceLockdown     Boolean @default(false)
   ForcedLockdownArray Json[]  @default([])
 
+  // Verification System
+  verificationChannelId String?
+  verificationRoleId    String?
+  verificationMode      VerificationMode @default(INSTANT)
+  verificationEnabled   Boolean          @default(false)
+
   MusicSettings MusicSettings?
   ModCases      ModCases[]
 
@@ -81,4 +87,9 @@ enum ModActionType {
   HACKBAN // target non-members in server to be banned
   UNBAN
   UNTIMEOUT
+}
+
+enum VerificationMode {
+  INSTANT
+  CAPTCHA
 }

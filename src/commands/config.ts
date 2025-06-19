@@ -15,105 +15,105 @@ export default {
     .setName("config")
     .setDescription("Manage moderation settings for this server")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("view")
-        .setDescription("View current moderation settings")
+        .setDescription("View current moderation settings"),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("set-mod-log")
         .setDescription("Set the moderation log channel")
-        .addChannelOption((option) =>
+        .addChannelOption(option =>
           option
             .setName("channel")
             .setDescription(
-              "Channel for moderation logs (leave empty to remove)"
+              "Channel for moderation logs (leave empty to remove)",
             )
-            .setRequired(true)
-        )
+            .setRequired(true),
+        ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("set-server-log")
         .setDescription("Set the server log channel")
-        .addChannelOption((option) =>
+        .addChannelOption(option =>
           option
             .setName("channel")
             .setDescription("Channel for server logs (leave empty to remove)")
-            .setRequired(true)
-        )
+            .setRequired(true),
+        ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("set-counter-channel")
         .setDescription("Set the counter game channel")
-        .addChannelOption((option) =>
+        .addChannelOption(option =>
           option
             .setName("channel")
             .setDescription(
-              "Channel for the counter game (leave empty to remove)"
+              "Channel for the counter game (leave empty to remove)",
             )
-            .setRequired(false)
-        )
+            .setRequired(false),
+        ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("set-counter-goal")
         .setDescription("Set the counter game goal")
-        .addIntegerOption((option) =>
+        .addIntegerOption(option =>
           option
             .setName("goal")
             .setDescription("The target number for the counter game")
             .setRequired(true)
             .setMinValue(1)
-            .setMaxValue(10000)
-        )
+            .setMaxValue(10000),
+        ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("reset-counter")
-        .setDescription("Reset the current counter to 0")
+        .setDescription("Reset the current counter to 0"),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("set-mod-role")
         .setDescription("Set a role required for moderation commands")
-        .addRoleOption((option) =>
+        .addRoleOption(option =>
           option
             .setName("role")
             .setDescription(
-              "Role required for moderation (leave empty to remove)"
+              "Role required for moderation (leave empty to remove)",
             )
-            .setRequired(false)
-        )
+            .setRequired(false),
+        ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("set-welcome-channel")
         .setDescription("Set the welcome channel for new member messages")
-        .addChannelOption((option) =>
+        .addChannelOption(option =>
           option
             .setName("channel")
             .setDescription(
-              "Channel for welcome messages (leave empty to remove)"
+              "Channel for welcome messages (leave empty to remove)",
             )
             .setRequired(false)
-            .addChannelTypes(ChannelType.GuildText)
-        )
+            .addChannelTypes(ChannelType.GuildText),
+        ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("set-main-role")
         .setDescription("Set the main role for lockdown operations")
-        .addRoleOption((option) =>
+        .addRoleOption(option =>
           option
             .setName("role")
             .setDescription(
-              "Main role for lockdown system (leave empty to remove)"
+              "Main role for lockdown system (leave empty to remove)",
             )
-            .setRequired(false)
-        )
+            .setRequired(false),
+        ),
     ),
 
   async execute(interaction: ChatInputCommandInteraction) {
@@ -175,7 +175,7 @@ async function handleView(interaction: ChatInputCommandInteraction) {
   if (!interaction.guild) return;
 
   const settings = await ModerationService.getOrCreateModerationSettings(
-    interaction.guild.id
+    interaction.guild.id,
   );
 
   const embed = new EmbedBuilder()
@@ -257,7 +257,7 @@ async function handleLogChannel(interaction: ChatInputCommandInteraction) {
     interaction.guild.id,
     {
       modLogChannelID: logChannelId,
-    }
+    },
   );
 
   if (!modSettings) {
@@ -283,7 +283,7 @@ async function handleLogChannel(interaction: ChatInputCommandInteraction) {
     interaction.guild.id,
     {
       modLogWebhookUrl: modLogWebhook.url,
-    }
+    },
   );
 
   console.log(modSettings);
@@ -301,7 +301,7 @@ async function handleLogChannel(interaction: ChatInputCommandInteraction) {
 }
 
 async function handleServerLogChannel(
-  interaction: ChatInputCommandInteraction
+  interaction: ChatInputCommandInteraction,
 ) {
   if (!interaction.guild) return;
 
@@ -320,7 +320,7 @@ async function handleServerLogChannel(
     interaction.guild.id,
     {
       serverLogChannelID: logChannelId,
-    }
+    },
   );
 
   if (!serverSettings) {
@@ -350,7 +350,7 @@ async function handleServerLogChannel(
       interaction.guild.id,
       {
         serverLogWebhookUrl: serverLogWebhook.url,
-      }
+      },
     );
 
     if (!serverSettings.serverLogWebhookUrl) {

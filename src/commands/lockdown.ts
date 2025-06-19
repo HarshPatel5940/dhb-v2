@@ -1,8 +1,12 @@
+import type { Guild as pGuild } from "@prisma/client";
+import type { JsonValue } from "@prisma/client/runtime/client";
+import type { InputJsonValue } from "@prisma/client/runtime/client";
+import type { JsonArray } from "@prisma/client/runtime/library";
 import {
   ChannelType,
-  type Guild,
   type ChatInputCommandInteraction,
   EmbedBuilder,
+  type Guild,
   PermissionFlagsBits,
   type Role,
   SlashCommandBuilder,
@@ -11,32 +15,28 @@ import {
 import type { Command } from "../interface/command.js";
 import { ModerationService } from "../service-classes/ModHelper.js";
 import prisma from "../utils/prisma.js";
-import type { JsonArray } from "@prisma/client/runtime/library";
-import type { JsonValue } from "@prisma/client/runtime/client";
-import type { Guild as pGuild } from "@prisma/client";
-import { InputJsonValue } from "@prisma/client/runtime/client";
 
 export default {
   data: new SlashCommandBuilder()
     .setName("lockdown")
     .setDescription("Lock down channels to prevent messaging")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("setup")
         .setDescription("Set the main role for lockdown system")
-        .addRoleOption((option) =>
+        .addRoleOption(option =>
           option
             .setName("role")
             .setDescription("The main role that should have send permissions")
             .setRequired(true),
         ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("lock-channel")
         .setDescription("Lock down a specific channel")
-        .addChannelOption((option) =>
+        .addChannelOption(option =>
           option
             .setName("channel")
             .setDescription("The channel to lock down (defaults to current)")
@@ -44,21 +44,21 @@ export default {
             .addChannelTypes(ChannelType.GuildText),
         ),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("lock-server")
         .setDescription("Lock down the entire server using the main role"),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("lock-server-forced")
         .setDescription("Force lock down every single channel"),
     )
-    .addSubcommand((subcommand) =>
+    .addSubcommand(subcommand =>
       subcommand
         .setName("unlock")
         .setDescription("Unlock a channel or the entire server")
-        .addChannelOption((option) =>
+        .addChannelOption(option =>
           option
             .setName("channel")
             .setDescription(
@@ -670,7 +670,7 @@ async function unlockAllChannels(
 
     try {
       if (hasForcedLockdownData) {
-        const savedPerms = PermChannelArray.find((item) => {
+        const savedPerms = PermChannelArray.find(item => {
           return item.channelId === channel.id;
         });
         if (savedPerms) {

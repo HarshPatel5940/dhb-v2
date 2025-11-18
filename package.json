@@ -28,7 +28,7 @@
 		"discord.js": "^14.19.3",
 		"dotenv": "^16.5.0",
 		"esbuild": "^0.25.5",
-		"glob": "^11.0.2",
+		"glob": "^11.1.0",
 		"prisma": "^6.8.2",
 		"shoukaku": "github:shipgirlproject/Shoukaku#cd319abde19b23a93d9367a6b28be5077e22e953",
 		"zod": "^3.25.46"
